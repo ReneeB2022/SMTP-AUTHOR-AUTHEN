@@ -1,0 +1,111 @@
+{
+	"@metadata": {
+		"current_page": 1,
+		"page_size": 10,
+		"first_page": 1,
+		"last_page": 4,
+		"total_records": 33
+	},
+	"Student": [
+		{
+			"id": 1,
+			"Fname": "Margaret",
+			"Lname": "Mcloughlin",
+			"gender": "female",
+			"age": 22,
+			"district_name": "Cayo",
+			"program code": "ABUS",
+			"gpa": 3.5
+		},
+		{
+			"id": 2,
+			"Fname": "Darleen",
+			"Lname": "Andrews",
+			"gender": "female",
+			"age": 40,
+			"district_name": "Stann Creek",
+			"program code": "BACC",
+			"gpa": 3.64
+		},
+		{
+			"id": 3,
+			"Fname": "Damien",
+			"Lname": "Wayne",
+			"gender": "Male",
+			"age": 19,
+			"district_name": "Toledo",
+			"program code": "BPHA",
+			"gpa": 4
+		},
+		{
+			"id": 4,
+			"Fname": "Michael",
+			"Lname": "Brown",
+			"gender": "Female",
+			"age": 18,
+			"district_name": "Stann Creek",
+			"program code": "APRE",
+			"gpa": 2.05
+		},
+		{
+			"id": 5,
+			"Fname": "Jane",
+			"Lname": "Brown",
+			"gender": "Female",
+			"age": 37,
+			"district_name": "Orange Walk",
+			"program code": "BACC",
+			"gpa": 2.65
+		},
+		{
+			"id": 6,
+			"Fname": "Jane",
+			"Lname": "Martinez",
+			"gender": "Male",
+			"age": 42,
+			"district_name": "Cayo",
+			"program code": "BPRE",
+			"gpa": 3.5
+		},
+		{
+			"id": 7,
+			"Fname": "Sarah",
+			"Lname": "Davis",
+			"gender": "Female",
+			"age": 38,
+			"district_name": "Stann Creek",
+			"program code": "BMAB",
+			"gpa": 2.68
+		},
+		{
+			"id": 8,
+			"Fname": "David",
+			"Lname": "Miller",
+			"gender": "Female",
+			"age": 37,
+			"district_name": "Orange Walk",
+			"program code": "BPRE",
+			"gpa": 2.88
+		},
+		{
+			"id": 9,
+			"Fname": "Chris",
+			"Lname": "Davis",
+			"gender": "Female",
+			"age": 36,
+			"district_name": "Belize",
+			"program code": "BACC",
+			"gpa": 3.8
+		},
+		{
+			"id": 10,
+			"Fname": "Linda",
+			"Lname": "Brown",
+			"gender": "Female",
+			"age": 35,
+			"district_name": "Toledo",
+			"program code": "BPHA",
+			"gpa": 2.75
+		}
+	]
+}
