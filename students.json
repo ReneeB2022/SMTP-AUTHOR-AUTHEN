@@ -3,8 +3,8 @@
 		"current_page": 1,
 		"page_size": 10,
 		"first_page": 1,
-		"last_page": 4,
-		"total_records": 33
+		"last_page": 5,
+		"total_records": 41
 	},
 	"Student": [
 		{
@@ -91,8 +91,8 @@
 			"id": 9,
 			"Fname": "Chris",
 			"Lname": "Davis",
-			"gender": "Female",
-			"age": 36,
+			"gender": "Male",
+			"age": 39,
 			"district_name": "Belize",
 			"program code": "BACC",
 			"gpa": 3.8

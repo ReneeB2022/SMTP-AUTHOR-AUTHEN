@@ -51,15 +51,53 @@ compare:
 	@echo 'Comparing Compressed and Uncompressed Request'
 	@ls -lh response.gz students.json
 
+##user commands
+.PHONY: create-user
+create-user:
+	BODY='{"username":"Marcus Fuller", "email":"MF@ub.edu.bz", "password": "Roaringcreek1"}';\
+	curl -i -d "$$BODY" localhost:4000/v1/users
+
+.PHONY: activate
+activate:
+	curl -X PUT -d '{"token": ""}' localhost:4000/v1/users/activated
+
+.PHONY: authenticate
+authenticate:	
+	BODY='{"email": "MF@ub.edu.bz", "password": "Roaringcreek1"}';\
+	curl -i -d "$$BODY" localhost:4000/v1/tokens/authentication
+
+.PHONY: aut-All-students
+aut-All-students:
+	curl -i -H "Authorization: Bearer " localhost:4000/v1/students
+
+##will fail because they do not have permission to write to the database
+.PHONY: aut-create-student 
+aut-create-student:
+
+.PHONY: Freya-aut
+Freya-aut:
+	BODY='{"email": "Freya@example.com", "password": "Mistletoe"}';\
+	curl -i -d "$$BODY" localhost:4000/v1/tokens/authentication
+
+##will succeed because Freya Has permission to write to the database
+.PHONY: Freya-write
+Freya-write:
+	BODY='{"Fname":"Pedro","Lname":"Pascal", "gender": "Male", "age": 45, "district_id": 3, "program": 12, "gpa": 3.25}';\
+	curl -i -d "$$BODY" -H "Authorization: Bearer E6LOVG3MKX74CHDONRG5Q2OZEQ" localhost:4000/v1/students
+
+.PHONY: Freya-Read
+Freya-Read: 
+	curl -i -H "Authorization: Bearer E6LOVG3MKX74CHDONRG5Q2OZEQ" localhost:4000/v1/students
+
 ## Student endpoint commands
 .PHONY: create-student
 create-student:
-	@BODY='{"Fname":"Mathew","Lname":"Lourde", "gender": "Male", "age": 27, "district_id": 5, "program": 19, "gpa": 2.57}'; \
+	@BODY='{"Fname":"Patrick","Lname":"Starr", "gender": "Male", "age": 17, "district_id": 1, "program": 10, "gpa": 2.40}'; \
 	curl -i -d "$$BODY" localhost:4000/v1/students
 
 .PHONY: All-students
 All-students:
-	@curl -i http://localhost:4000/v1/students
+	curl -i http://localhost:4000/v1/students
 
 .PHONY: one-student
 one-student:

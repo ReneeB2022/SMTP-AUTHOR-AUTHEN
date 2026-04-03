@@ -32,8 +32,15 @@ func (a *applicationDependencies) serve() error {
 		// create a context
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
-
-		shutdownError <- apiServer.Shutdown(ctx)
+		// we will only write to the error channel if there is an error
+		err := apiServer.Shutdown(ctx)
+		if err != nil {
+			shutdownError <- err
+		}
+		// Wait for background tasks to complete
+		a.logger.Info("completing background tasks", "address", apiServer.Addr)
+		a.wg.Wait()
+		shutdownError <- nil // successful shutdown
 	}()
 
 	a.logger.Info("starting server", "address", apiServer.Addr,

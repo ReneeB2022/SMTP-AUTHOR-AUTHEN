@@ -9,6 +9,10 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
+
+	"github.com/ReneeB2022/test1/internal/mailer"
+
 	"time"
 
 	// the '_' means that we will not direct use the pq package
@@ -32,6 +36,13 @@ type serverConfig struct {
 	cors struct {
 		trustedOrigins []string
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 type applicationDependencies struct {
@@ -48,6 +59,11 @@ type applicationDependencies struct {
 	courseModel     data.CourseModel
 	grademodel      data.GradeModel
 	sectionModel    data.SectionModel
+	userModel       data.UserModel
+	mailer          mailer.Mailer
+	wg              sync.WaitGroup // need this later for background jobs
+	tokenModel      data.TokenModel
+	permissionModel data.PermissionModel
 }
 
 func main() {
@@ -66,6 +82,21 @@ func main() {
 
 	flag.BoolVar(&settings.limiter.enabled, "limiter-enabled", true,
 		"Enable rate limiter")
+
+	flag.StringVar(&settings.smtp.host,
+		"smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	// We have port 25, 465, 587, 2525. If 25 doesn't work choose another
+	flag.IntVar(&settings.smtp.port, "smtp-port", 25, "SMTP port")
+	// Use your Username value provided by Mailtrap
+	flag.StringVar(&settings.smtp.username, "smtp-username",
+		"eda8776363d858", "SMTP username")
+
+	flag.StringVar(&settings.smtp.password, "smtp-password",
+		"3db35c0d79806a", "SMTP password")
+
+	flag.StringVar(&settings.smtp.sender, "smtp-sender",
+		"University <no-reply@university.reneebanner.net>",
+		"SMTP sender")
 
 	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)",
 		func(val string) error {
@@ -118,6 +149,12 @@ func main() {
 		courseModel:     data.CourseModel{DB: db},
 		grademodel:      data.GradeModel{DB: db},
 		sectionModel:    data.SectionModel{DB: db},
+		userModel:       data.UserModel{DB: db},
+		tokenModel:      data.TokenModel{DB: db},
+		permissionModel: data.PermissionModel{DB: db},
+
+		mailer: mailer.New(settings.smtp.host, settings.smtp.port,
+			settings.smtp.username, settings.smtp.password, settings.smtp.sender),
 	}
 	err = appInstance.serve()
 	if err != nil {

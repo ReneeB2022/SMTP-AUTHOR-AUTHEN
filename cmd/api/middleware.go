@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
+	"errors"
 	"expvar"
 	"fmt"
 	"log"
@@ -13,6 +14,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ReneeB2022/test1/internal/data"
+	"github.com/ReneeB2022/test1/internal/validator"
 	"golang.org/x/time/rate"
 )
 
@@ -56,6 +59,114 @@ type gzipcompress struct {
 	gz            *gzip.Writer
 	headerWritten bool
 	code          int
+}
+
+func (a *applicationDependencies) requireAuthenticatedUser(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		user := a.contextGetUser(r)
+
+		if user.IsAnonymous() {
+			a.authenticationRequiredResponse(w, r)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (a *applicationDependencies) requirePermission(permissionCode string, next http.HandlerFunc) http.HandlerFunc {
+
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		user := a.contextGetUser(r)
+		// get all the permissions associated with the user
+		permissions, err := a.permissionModel.GetAllForUser(user.ID)
+		if err != nil {
+			a.serverErrorResponse(w, r, err)
+			return
+		}
+		if !permissions.Include(permissionCode) {
+			a.notPermittedResponse(w, r)
+			return
+		}
+		// they are good. Let's keep going
+		next.ServeHTTP(w, r)
+	}
+
+	return a.requireActivatedUser(fn)
+
+}
+
+// This middleware checks if the user is activated
+// It call the authentication middleware to help it do its job
+func (a *applicationDependencies) requireActivatedUser(next http.HandlerFunc) http.HandlerFunc {
+	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		user := a.contextGetUser(r)
+
+		if !user.Activated {
+			a.inactiveAccountResponse(w, r)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+	//We pass the activation check middleware to the authentication
+	// middleware to call (next) if the authentication check succeeds
+	// In other words, only check if the user is activated if they are
+	// actually authenticated.
+	return a.requireAuthenticatedUser(fn)
+}
+
+func (a *applicationDependencies) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Add("Vary", "Authorization")
+
+		// Get the Authorization header from the request. It should have the
+		// Bearer token
+		authorizationHeader := r.Header.Get("Authorization")
+
+		// If there is no Authorization header then we have an Anonymous user
+		if authorizationHeader == "" {
+			r = a.contextSetUser(r, data.AnonymousUser)
+			next.ServeHTTP(w, r)
+			return
+		}
+		// Bearer token present so parse it. The Bearer token is in the form
+		// Authorization: Bearer IEYZQUBEMPPAKPOAWTPV6YJ6RM
+		headerParts := strings.Split(authorizationHeader, " ")
+		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+			a.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		// Get the actual token
+		token := headerParts[1]
+		// Validate
+		v := validator.New()
+
+		data.ValidateTokenPlaintext(v, token)
+		if !v.IsEmpty() {
+			a.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		// Get the user info associated with this authentication token
+		user, err := a.userModel.GetForToken(data.ScopeAuthentication, token)
+		if err != nil {
+			switch {
+			case errors.Is(err, data.ErrRecordNotFound):
+				a.invalidAuthenticationTokenResponse(w, r)
+			default:
+				a.serverErrorResponse(w, r, err)
+			}
+			return
+		}
+		// Add the retrieved user info to the context
+		r = a.contextSetUser(r, user)
+
+		// Call the next handler in the chain.
+		next.ServeHTTP(w, r)
+	})
 }
 
 func (w *gzipcompress) Write(b []byte) (int, error) {

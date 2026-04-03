@@ -5,6 +5,38 @@ import (
 	"net/http"
 )
 
+// We set the WWW-Authenticate header to give a hint to the user as
+// to what they need to provide. Don't want to leave them guessing
+func (a *applicationDependencies) invalidAuthenticationTokenResponse(w http.ResponseWriter,
+	r *http.Request) {
+
+	w.Header().Set("WWW-Authenticate", "Bearer")
+
+	message := "invalid or missing authentication token"
+	a.errorResponseJSON(w, r, http.StatusUnauthorized, message)
+
+}
+
+// Note: 401 is Unauthorized (anonymous) and 403 is Forbidden (authenticated
+// but not activated or don't have the right privilege)
+
+func (a *applicationDependencies) authenticationRequiredResponse(w http.ResponseWriter, r *http.Request) {
+	message := "you must be authenticated to access this resource"
+	a.errorResponseJSON(w, r, http.StatusUnauthorized, message)
+}
+
+func (a *applicationDependencies) inactiveAccountResponse(w http.ResponseWriter, r *http.Request) {
+	message := "your user account must be activated to access this resource"
+	a.errorResponseJSON(w, r, http.StatusForbidden, message)
+}
+
+func (a *applicationDependencies) notPermittedResponse(w http.ResponseWriter,
+	r *http.Request) {
+	message := "your user account doesn't have the necessary permissions to access this resource"
+
+	a.errorResponseJSON(w, r, http.StatusForbidden, message)
+}
+
 func (a *applicationDependencies) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
 
 	message := "rate limit exceeded"
@@ -68,4 +100,12 @@ func (a *applicationDependencies) badRequestResponse(w http.ResponseWriter,
 	err error) {
 
 	a.errorResponseJSON(w, r, http.StatusBadRequest, err.Error())
+}
+
+func (a *applicationDependencies) editConflictResponse(w http.ResponseWriter,
+	r *http.Request) {
+
+	message := "unable to update the record due to an edit conflict, please try again"
+	a.errorResponseJSON(w, r, http.StatusConflict, message)
+
 }
