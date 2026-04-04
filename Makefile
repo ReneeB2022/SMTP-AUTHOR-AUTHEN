@@ -54,7 +54,7 @@ compare:
 ##user commands
 .PHONY: create-user
 create-user:
-	BODY='{"username":"Marcus Fuller", "email":"MF@ub.edu.bz", "password": "Roaringcreek1"}';\
+	BODY='{"username":"Ruby Rider", "email":"RR@ub.edu.bz", "password": "silkgrass1"}';\
 	curl -i -d "$$BODY" localhost:4000/v1/users
 
 .PHONY: activate
@@ -63,7 +63,7 @@ activate:
 
 .PHONY: authenticate
 authenticate:	
-	BODY='{"email": "MF@ub.edu.bz", "password": "Roaringcreek1"}';\
+	BODY='{"email": "RR@ub.edu.bz", "password": "silkgrass1"}';\
 	curl -i -d "$$BODY" localhost:4000/v1/tokens/authentication
 
 .PHONY: aut-All-students

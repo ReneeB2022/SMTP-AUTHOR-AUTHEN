@@ -9,6 +9,7 @@ import (
 	"github.com/go-mail/mail/v2"
 )
 
+//go:embed "templates"
 var templateFS embed.FS // embed the files from templates into our program
 
 // dialer is a connection to the SMTP server
